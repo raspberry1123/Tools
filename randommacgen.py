@@ -1,4 +1,5 @@
 #! /usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import random
 
@@ -8,13 +9,14 @@ def generate_octet():
 
 
 
+# 最上位オクテットの下位2-bitを0にする
 mac = ''
-first = "%x" % ( (generate_octet() >> 2 )<< 2)
+first = "%02x" % ( (generate_octet() >> 2 )<< 2)
 
 mac += first
 
 for i in range(5):
-    mac += ':' + "%x" % generate_octet()
+    mac += ':' + "%02x" % generate_octet()
 
 
 print mac
