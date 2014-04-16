@@ -1,0 +1,45 @@
+- hosts: spark-hosts
+  user: root
+  vars:
+    jdk_rpm: jdk-7u55-linux-x64.rpm
+    scala_rpm: scala-2.10.4.rpm
+    scala_url: http://www.scala-lang.org/files/archive/{{scala_rpm}}
+    spark_tgz: spark-0.9.1-bin-hadoop2.tgz
+    spark_dir: spark-0.9.1-bin-hadoop2
+    spark_url: http://d3kbcqa49mib13.cloudfront.net/{{spark_tgz}}
+
+  tasks:
+    - name: download jdk
+      shell: 'wget --no-check-certificate --no-cookies - --header "Cookie: oraclelicense=accept-securebackup-cookie" http://download.oracle.com/otn-pub/java/jdk/7u55-b13/{{jdk_rpm}} -O /tmp/{{jdk_rpm}} creates=/tmp/{{jdk_rpm}}'
+
+    - name: install jdk
+      yum: name=/tmp/{{jdk_rpm}} state=present
+
+    - name: download scala
+      shell: wget {{scala_url}} -P /tmp/ creates=/tmp/{{scala_rpm}} creates=/tmp/{{scala_rpm}}
+    - name: install scala
+      yum: name=/tmp/{{scala_rpm}} state=present
+
+    - name: download spark
+      shell: wget {{spark_url}} -P /tmp/ creates=/tmp/{{spark_tgz}}
+    - name: mkdir /usr/local/spark
+      file: path=/usr/local/spark/ state=directory
+    - name: install spark
+      shell: tar xfz /tmp/{{spark_tgz}} -C /usr/local/spark/ creates=/usr/local/spark/{{spark_dir}}
+      
+    - name: download cdh5 repo
+      shell: wget http://archive.cloudera.com/cdh5/one-click-install/redhat/6/x86_64/cloudera-cdh-5-0.x86_64.rpm -P /tmp
+    - name: install cdh5 repo
+      yum: name=/tmp/cloudera-cdh-5-0.x86_64.rpm state=present
+
+- hosts: spark-slaves
+  user: root
+  tasks:
+    - name: install datanode
+      yum: name=hadoop-hdfs-datanode state=latest
+
+- hosts: spark-masters
+  user: root
+  tasks:
+    - name: install namenode
+      yum: name=hadoop-hdfs-namenode state=latest
